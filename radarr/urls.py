@@ -18,9 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from core.urls import urlpatterns as ratings_urls
 from accounts.urls import urlpatterns as accounts_urls
+from rest_framework import routers
+from core.views import  NetworkRatingViewSet
+
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/ratings/', include(ratings_urls)),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/accounts/', include(accounts_urls)),
 ]

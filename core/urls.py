@@ -1,9 +1,9 @@
 from django.urls import include, path
 from rest_framework import routers
-from core.views import UserViewSet
+from core.views import NetworkRatingViewSet
 
 router = routers.DefaultRouter()
-router.register(r'core', UserViewSet)
+router.register(r'core', NetworkRatingViewSet)
 
 app_name = 'core'
 

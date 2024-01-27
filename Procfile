@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn casamart.wsgi
+web: python manage.py migrate && gunicorn radarr.wsgi

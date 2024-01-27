@@ -48,3 +48,10 @@ body {
   color: #fff;
   border-bottom-color: #fff;
 }
+
+
+.main{
+    height: 100vh;
+    display: grid;
+    place-items: center;
+}

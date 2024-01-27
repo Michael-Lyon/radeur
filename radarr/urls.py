@@ -27,6 +27,11 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from core.docs import landing
 
+
+from django.views.static import serve
+from django.conf import settings
+from django.conf.urls.static import static
+
 schema_view = get_schema_view(
     openapi.Info(
         title="RADEUR API",
@@ -56,6 +61,10 @@ urlpatterns = [
     path('api/network/', include(ratings_urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/accounts/', include(accounts_urls)),
+
+    # STATIC FILES
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]
 
 

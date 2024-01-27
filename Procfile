@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn radarr.wsgi
+web: python manage.py makemigrations && python manage.py migrate && gunicorn radarr.wsgi

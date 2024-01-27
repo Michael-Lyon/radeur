@@ -16,6 +16,7 @@ inflection==0.5.1
 Markdown==3.4.3
 packaging==23.2
 pillow==10.2.0
+psycopg2==2.9.9
 PyJWT==2.7.0
 python-dotenv==1.0.1
 pytz==2023.3

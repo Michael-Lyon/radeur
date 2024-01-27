@@ -15,20 +15,50 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from core.urls import urlpatterns as ratings_urls
 from accounts.urls import urlpatterns as accounts_urls
-from rest_framework import routers
-from core.views import  NetworkRatingViewSet
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+from core.docs import landing
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="RADEUR API",
+        default_version='v1',
+        description="Welcome to RADEUR API",
+        contact=openapi.Contact(email="real_pygod@icloud.com"),
+        license=openapi.License(name="Awesome IP"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 
 
 urlpatterns = [
+    # SCHEMA
+    re_path(r'^doc(?P<format>\.json|\.yaml)$',
+            schema_view.without_ui(cache_timeout=0), name='schema-json'),  #<-- Here
+    path('doc/', schema_view.with_ui('swagger', cache_timeout=0),
+        name='schema-swagger-ui'),  #<-- Here
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0),
+        name='schema-redoc'),  #<-- Here
+
+    # MAIN URLS
+    path("", landing),
     path('admin/', admin.site.urls),
-    path('api/ratings/', include(ratings_urls)),
+    path('api/network/', include(ratings_urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/accounts/', include(accounts_urls)),
 ]
+
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

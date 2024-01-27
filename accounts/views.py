@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
-from .serializers import UserSerializer
+
+from core.models import NetworkRating
+from core.serializers import NetworkRatingSerializer
+from .serializers import LoginSerializer, UserSerializer
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,6 +15,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .models import UserProfile
+from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
 # Create your views here.
@@ -20,19 +26,19 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        location = request.data.get('location')
+        # location = request.data.get('location')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        
         # Create UserProfile with the user and store the location
-        UserProfile.objects.create(user=user, location=location)
+        UserProfile.objects.create(user=user)
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class LoginViewSet(ViewSet):
+    serializer_class = LoginSerializer
     def create(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -51,3 +57,13 @@ class LoginViewSet(ViewSet):
         access_token = str(refresh.access_token)
 
         return Response({'access_token': access_token})
+
+
+class ProfileApiView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        ratings = NetworkRating.objects.filter(user=user)
+        return Response({'user': {"username": user.username, "email": user.email, "first_name": user.first_name, "last_name": user.last_name}, "ratings": NetworkRatingSerializer(ratings, many=True).data})

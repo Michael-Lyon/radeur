@@ -1,12 +1,12 @@
 from django.urls import include, path
-from rest_framework import routers
-from core.views import NetworkRatingViewSet
+from core import views
 
-router = routers.DefaultRouter()
-router.register(r'core', NetworkRatingViewSet)
 
 app_name = 'core'
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('ratings/', views.NetworkRatingListCreate.as_view(), name="network_rating_list_create"),
+    path('ratings/<int:pk>', views.NetworkRatingDetail.as_view(), name="network_rating_detail"),
+    path('comments/', views.CommentView.as_view(), name='add-comment'),
+    path('comments/<int:comment_id>/like/', views.CommentView.as_view(), name='like-comment'),
 ]

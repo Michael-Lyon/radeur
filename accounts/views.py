@@ -33,7 +33,6 @@ class UserViewSet(viewsets.ModelViewSet):
         # Create UserProfile with the user and store the location
         UserProfile.objects.create(user=user)
 
-        headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 

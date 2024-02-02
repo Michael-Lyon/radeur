@@ -163,7 +163,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ["Bearer"],
-    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(hours=6),
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(hours=60),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(weeks=12)
 }
 

@@ -32,8 +32,10 @@ class UserViewSet(viewsets.ModelViewSet):
         user = serializer.save()
         # Create UserProfile with the user and store the location
         UserProfile.objects.create(user=user)
+        data = serializer.data
+        data['id'] = user.id
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class LoginViewSet(ViewSet):

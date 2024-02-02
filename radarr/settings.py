@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-+1ox5^h_!gfd&s5b0fsxng6zb!1m52ls7+rezfzp_y02%^f98-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "radeur.up.railway.app"]
+ALLOWED_HOSTS = ["localhost", "radeur.up.railway.app", '127.0.0.1']
 
 
 # Application definition
@@ -195,4 +195,4 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://radeur.up.railway.app', "http://localhost:8000"]
+CSRF_TRUSTED_ORIGINS = ['https://radeur.up.railway.app', "http://127.0.0.1:7000", "http://localhost:8000" ]

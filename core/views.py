@@ -92,7 +92,7 @@ class CommentView(APIView):
     def post(self, request, format=None):
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()  # Assuming the user is authenticated
+            serializer.save(user=request.user)  # Assuming the user is authenticated
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

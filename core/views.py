@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from geopy.geocoders import Nominatim
-from core.models import Comment, NetworkDevice, NetworkRating
+from core.models import Comment, Network, NetworkDevice, NetworkRating
 from core.serializers import  CommentSerializer, NetworkDeviceSerializer, NetworkRatingSerializer, NetworkSerializer
 from django.contrib.gis.measure import Distance
 from rest_framework.views import APIView
@@ -89,20 +89,29 @@ class NetworkRatingDetail(APIView):
 class CommentView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
+
     def post(self, request, format=None):
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)  # Assuming the user is authenticated
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, comment_id, format=None):
         comment = Comment.objects.get(pk=comment_id)
         if request.user in comment.likes.all():
-            comment.likes.remove(request.user)  # Unlike the comment
+            comment.likes.remove(request.user)
         else:
-            comment.likes.add(request.user)  # Like the comment
+            comment.likes.add(request.user)
         return Response({'status': 'like status changed'}, status=status.HTTP_200_OK)
+
+    def put(self, request, comment_id, format=None):
+        comment = Comment.objects.get(pk=comment_id)
+        serializer = CommentSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DevicesView(APIView):
@@ -113,10 +122,10 @@ class DevicesView(APIView):
         serializer = NetworkDeviceSerializer(devices, many=True)
         return Response(serializer.data)
 
-class Network(APIView):
+class NetworkView(APIView):
     serializer_class = NetworkSerializer
 
     def get(self, request):
         network = Network.objects.all()
-        serializer = NetworkSerializer(network, many=True, contect={"request": request})
+        serializer = NetworkSerializer(network, many=True, context={"request": request})
         return Response(serializer.data)

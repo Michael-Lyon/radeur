@@ -52,25 +52,23 @@ class CommentSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField()
     num_likes = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
         fields = ['id', 'user', 'content', 'network_rating', 'created_at', 'updated_at', 'parent', 'num_likes', 'liked', 'replies']
         extra_kwargs = {
-            'user': {'required': False, },
+            'user': {'required': False},
         }
 
     def get_replies(self, obj):
-        # If the comment is a parent comment, serialize its replies
         if obj.parent is None:
             replies = obj.replies.all()
             return CommentSerializer(replies, many=True, context=self.context).data
         return []
 
     def get_num_likes(self, obj):
-        # If the comment is a parent comment, serialize its replies
         if obj.parent is None:
-            numbers = obj.total_likes
-            return numbers
+            return obj.total_likes
+
     def get_liked(self, obj):
-        # If the comment is a parent comment, serialize its replies
         return obj.is_liked

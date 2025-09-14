@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 # from django.contrib.gis.db import models as gis_models
 
 User = get_user_model()
@@ -65,17 +67,63 @@ class NetworkRating(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     network = models.ForeignKey(Network, on_delete=models.CASCADE, blank=True, null=True)
     device = models.ForeignKey(NetworkDevice, on_delete=models.SET_NULL, null=True, blank=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=1)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    rating = models.DecimalField(
+        max_digits=3, 
+        decimal_places=1, 
+        validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
+        help_text="Rating between 1.0 and 5.0"
+    )
+    latitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True, 
+        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
+        help_text="Latitude coordinate (-90 to 90)"
+    )
+    longitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True, 
+        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
+        help_text="Longitude coordinate (-180 to 180)"
+    )
     # location = gis_models.PointField(null=True, blank=True)
-    address = models.CharField(max_length=500, null=True, blank=True)
+    address = models.CharField(max_length=500, null=True, blank=True, help_text="User's location address")
     created_at = models.DateTimeField(auto_now_add=True)
     # objects = gis_models.Manager()
-    review = models.CharField(max_length=225)
+    review = models.TextField(max_length=1000, help_text="User's detailed review of the network")
+
+    def clean(self):
+        """Validate the model instance"""
+        super().clean()
+        
+        # Validate rating
+        if self.rating and (self.rating < 1.0 or self.rating > 5.0):
+            raise ValidationError({'rating': 'Rating must be between 1.0 and 5.0'})
+        
+        # Validate coordinates if provided
+        if self.latitude is not None and (self.latitude < -90 or self.latitude > 90):
+            raise ValidationError({'latitude': 'Latitude must be between -90 and 90'})
+        
+        if self.longitude is not None and (self.longitude < -180 or self.longitude > 180):
+            raise ValidationError({'longitude': 'Longitude must be between -180 and 180'})
+        
+        # Ensure both coordinates are provided together or both are None
+        if (self.latitude is None) != (self.longitude is None):
+            raise ValidationError('Both latitude and longitude must be provided together')
+        
+        # Validate review length
+        if self.review and len(self.review.strip()) < 10:
+            raise ValidationError({'review': 'Review must be at least 10 characters long'})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.network.name} Rating by {self.user.username}'
+        return f'{self.network.name} Rating by {self.user.username}' if self.network else f'Rating by {self.user.username}'
 
 class Comment(models.Model):
     """

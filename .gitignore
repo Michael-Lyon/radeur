@@ -1,3 +1,4 @@
 env/
 .env
 db.sqlite3
+CLAUDE.md``
